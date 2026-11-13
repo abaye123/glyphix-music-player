@@ -1,0 +1,477 @@
+<template>
+  <scroll class="page">
+    <div class="top-space"></div>
+    <div if="{{!hasTrack}}" class="message-box">
+      <image class="cover-note" src="/assets/note.png"/>
+      <text class="message">{{noTrackText}}</text>
+    </div>
+    <div if="{{hasTrack}}" class="column">
+      <div class="cover-box">
+        <image if="{{coverSrc}}" class="cover" src="{{coverSrc}}"/>
+        <image if="{{!coverSrc}}" class="cover-note" src="/assets/note.png"/>
+      </div>
+      <text class="song-title">{{title}}</text>
+      <text class="song-artist">{{artist}}</text>
+      <div class="times">
+        <text class="time">{{elapsed}}</text>
+        <text class="error">{{errorText}}</text>
+        <text class="time">{{total}}</text>
+      </div>
+      <progress class="bar" min="0" max="1000" value="{{progress}}"></progress>
+      <div class="transport">
+        <div class="side-btn" on:click="prev">
+          <image class="side-icon" src="/assets/prev.png"/>
+        </div>
+        <div class="play-btn" on:click="toggle">
+          <image if="{{playing}}" class="play-icon" src="/assets/pause.png"/>
+          <image if="{{!playing}}" class="play-icon" src="/assets/play.png"/>
+        </div>
+        <div class="side-btn" on:click="next">
+          <image class="side-icon" src="/assets/next.png"/>
+        </div>
+      </div>
+      <div class="seek-row">
+        <div class="seek-btn" on:click="seekBy(-10)">
+          <text class="seek-text">-10</text>
+        </div>
+        <div class="seek-btn" on:click="seekBy(30)">
+          <text class="seek-text">+30</text>
+        </div>
+      </div>
+
+      <div class="modes">
+        <div class="mode-btn" on:click="cycleRepeat">
+          <image if="{{repeat === 'off'}}" class="mode-icon" src="/assets/repeat-off.png"/>
+          <image if="{{repeat === 'all'}}" class="mode-icon" src="/assets/repeat-all.png"/>
+          <image if="{{repeat === 'one'}}" class="mode-icon" src="/assets/repeat-one.png"/>
+        </div>
+        <div class="mode-btn" on:click="toggleShuffle">
+          <image if="{{shuffle}}" class="mode-icon" src="/assets/shuffle-on.png"/>
+          <image if="{{!shuffle}}" class="mode-icon" src="/assets/shuffle-off.png"/>
+        </div>
+        <div class="mode-btn" on:click="toggleFavorite">
+          <image if="{{favorite}}" class="mode-icon" src="/assets/heart-on.png"/>
+          <image if="{{!favorite}}" class="mode-icon" src="/assets/heart-off.png"/>
+        </div>
+      </div>
+      <text class="mode-text">{{modeText}}</text>
+      <div class="volume">
+        <div class="vol-btn" on:click="volume(-1)">
+          <text class="vol-sign">-</text>
+        </div>
+        <text class="vol-text">{{volumeText}}</text>
+        <div class="vol-btn" on:click="volume(1)">
+          <text class="vol-sign">+</text>
+        </div>
+      </div>
+      <div class="pill" on:click="addToList">
+        <text class="pill-text">{{addText}}</text>
+      </div>
+      <div class="pill" on:click="openQueue">
+        <text class="pill-text">{{queueText}}</text>
+      </div>
+      <div class="pill" on:click="openArtist">
+        <text class="pill-text">{{artistText}}</text>
+      </div>
+      <div class="pill" on:click="openAlbum">
+        <text class="pill-text">{{albumText}}</text>
+      </div>
+    </div>
+    <div class="bottom-space"></div>
+  </scroll>
+</template>
+
+<style>
+  .page {
+    width: 466px;
+    height: 466px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .top-space {
+    width: 10px;
+    height: 30px;
+  }
+
+  .bottom-space {
+    width: 10px;
+    height: 90px;
+  }
+
+  .column {
+    width: 466px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .message-box {
+    width: 340px;
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .message {
+    width: 340px;
+    margin-top: 16px;
+    font-size: 28px;
+    color: #d8d8e8;
+    text-align: center;
+  }
+
+  .cover-box {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    background-color: #1e1e2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cover {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+  }
+
+  .cover-note {
+    width: 80px;
+    height: 80px;
+  }
+
+  .song-title {
+    width: 330px;
+    height: 38px;
+    margin-top: 8px;
+    font-size: 28px;
+    color: #ffffff;
+    text-align: center;
+    max-lines: 1;
+    text-overflow: ellipsis;
+  }
+
+  .song-artist {
+    width: 300px;
+    height: 30px;
+    font-size: 22px;
+    color: #b0b0c4;
+    text-align: center;
+    max-lines: 1;
+    text-overflow: ellipsis;
+  }
+
+  .times {
+    width: 330px;
+    height: 28px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .time {
+    font-size: 20px;
+    color: #b0b0c4;
+  }
+
+  .error {
+    font-size: 20px;
+    color: #ff6070;
+  }
+
+  /* A bound inline width is not re-applied on updates; the progress value is. */
+  .bar {
+    width: 330px;
+    height: 10px;
+    margin-top: 2px;
+    color: #ffa040;
+    background-color: #33334a;
+  }
+
+  .transport {
+    width: 330px;
+    height: 96px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .side-btn {
+    width: 84px;
+    height: 84px;
+    border-radius: 42px;
+    background-color: #1e1e2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .side-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .play-btn {
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    background-color: #ffa040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .play-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .seek-row {
+    width: 220px;
+    height: 60px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .seek-btn {
+    width: 100px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: #1e1e2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .seek-text {
+    font-size: 26px;
+    color: #ffffff;
+  }
+
+  .modes {
+    width: 300px;
+    height: 84px;
+    margin-top: 70px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mode-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background-color: #1e1e2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mode-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mode-text {
+    width: 320px;
+    height: 32px;
+    margin-top: 6px;
+    font-size: 22px;
+    color: #b0b0c4;
+    text-align: center;
+  }
+
+  .volume {
+    width: 330px;
+    height: 84px;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vol-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background-color: #1e1e2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vol-sign {
+    font-size: 40px;
+    color: #ffffff;
+  }
+
+  .vol-text {
+    font-size: 24px;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .pill {
+    width: 320px;
+    height: 66px;
+    margin-top: 10px;
+    border-radius: 33px;
+    background-color: #1e1e2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pill-text {
+    font-size: 26px;
+    color: #ffffff;
+    text-align: center;
+  }
+</style>
+
+<script>
+  import prompt from '@system.prompt'
+  import router from '@system.router'
+  import { boot, openView } from '../lib/boot.js'
+  import { coverUri } from '../lib/library.js'
+  import { st, isFavorite, toggleFavorite } from '../lib/store.js'
+  import * as P from '../lib/player.js'
+  import { T } from '../lib/strings.js'
+  import { formatTime } from '../lib/util.js'
+
+  function toast(text) {
+    try {
+      prompt.showToast({ message: text })
+    } catch (e) {
+      console.info('[music] toast failed: ' + e)
+    }
+  }
+
+  export default {
+    data: {
+      hasTrack: false,
+      noTrackText: T.noTrack,
+      coverSrc: '',
+      title: '',
+      artist: '',
+      elapsed: '0:00',
+      total: '0:00',
+      progress: 0,
+      errorText: '',
+      playing: false,
+      repeat: 'off',
+      shuffle: false,
+      favorite: false,
+      modeText: '',
+      volumeText: '',
+      addText: T.addToPlaylist,
+      queueText: T.queue,
+      artistText: T.toArtist,
+      albumText: T.toAlbum
+    },
+    unsub: null,
+    onInit() {
+      boot().then(() => this.refresh())
+    },
+    onShow() {
+      if (!this.unsub) this.unsub = P.subscribe(() => this.refresh())
+      P.sync()
+      this.refresh()
+      this.readVolume()
+    },
+    onHide() {
+      if (this.unsub) this.unsub()
+      this.unsub = null
+    },
+    refresh() {
+      const t = P.current()
+      this.hasTrack = !!t
+      if (!t) return
+      const cover = coverUri(t)
+      if (this.coverSrc !== cover) this.coverSrc = cover
+      this.title = t.title
+      this.artist = t.artist || T.unknownArtist
+      const d = P.pl.duration > 0 ? P.pl.duration : t.duration
+      const pos = Math.min(P.pl.position, d > 0 ? d : P.pl.position)
+      this.elapsed = formatTime(pos)
+      this.total = formatTime(d)
+      this.progress = d > 0 ? Math.round(1000 * pos / d) : 0
+      this.errorText = P.pl.error ? T.playError : ''
+      this.playing = P.pl.status === 'play'
+      this.repeat = st.repeat
+      this.shuffle = st.shuffle
+      this.favorite = isFavorite(t.id)
+      this.modeText = this.modeLine()
+    },
+    modeLine() {
+      const r = st.repeat === 'all' ? T.repeatAll : st.repeat === 'one' ? T.repeatOne : T.repeatOff
+      return r + ' | ' + (st.shuffle ? T.shuffleOn : T.shuffleOff)
+    },
+    readVolume() {
+      P.getVolumeStep().then(step => this.showVolume(step))
+    },
+    showVolume(step) {
+      this.volumeText = step < 0 ? T.volume : T.volume + ' ' + step + '/' + P.VOLUME_MAX
+    },
+    toggle() {
+      P.toggle()
+      this.refresh()
+    },
+    prev() {
+      P.prev()
+    },
+    next() {
+      P.next()
+    },
+    seekBy(delta) {
+      P.seekBy(delta)
+    },
+    cycleRepeat() {
+      P.cycleRepeat()
+      this.refresh()
+    },
+    toggleShuffle() {
+      P.setShuffle(!st.shuffle)
+      this.refresh()
+    },
+    toggleFavorite() {
+      const t = P.current()
+      if (!t) return
+      const on = toggleFavorite(t.id)
+      toast(on ? T.favOn : T.favOff)
+      this.refresh()
+    },
+    volume(direction) {
+      P.stepVolume(direction).then(step => this.showVolume(step))
+    },
+    addToList() {
+      if (!P.current()) return
+      router.push({ uri: 'addto' })
+    },
+    openQueue() {
+      openView({ kind: 'queue' })
+    },
+    openArtist() {
+      const t = P.current()
+      if (t) openView({ kind: 'artist', name: t.artist || T.unknownArtist })
+    },
+    openAlbum() {
+      const t = P.current()
+      if (t) openView({ kind: 'album', name: t.album || T.unknownAlbum })
+    }
+  }
+</script>

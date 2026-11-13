@@ -1,0 +1,22 @@
+{
+  "package": "com.xfaith.woodenfish",
+  "name": "מוזיקה",
+  "icon": "/assets/icon.png",
+  "versionName": "0.3.0",
+  "versionCode": 300,
+  "features": [],
+  "permissions": [
+    { "name": "watch.permission.SYSTEM" }
+  ],
+  "router": {
+    "entry": "main",
+    "pages": {
+      "main": { "component": "index" },
+      "player": { "component": "index" },
+      "browse": { "component": "index" },
+      "search": { "component": "index" },
+      "addto": { "component": "index" }
+    }
+  },
+  "config": { "designWidth": 466 }
+}

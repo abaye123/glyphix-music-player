@@ -1,0 +1,222 @@
+<template>
+  <scroll class="page">
+    <div class="top-space"></div>
+    <text class="title">{{title}}</text>
+    <div if="{{status === 'loading'}}" class="message-box">
+      <text class="message">{{loadingText}}</text>
+    </div>
+    <div if="{{status === 'empty' || status === 'bad'}}" class="message-box">
+      <image class="empty-icon" src="/assets/note.png"/>
+      <text class="message">{{emptyText}}</text>
+    </div>
+    <div if="{{status === 'ok'}}" class="menu">
+      <div if="{{hasTrack}}" class="mini">
+        <div class="mini-btn" on:click="toggle">
+          <image if="{{playing}}" class="mini-icon" src="/assets/pause.png"/>
+          <image if="{{!playing}}" class="mini-icon" src="/assets/play.png"/>
+        </div>
+        <div class="mini-text" on:click="openNow">
+          <text class="mini-state">{{miniState}}</text>
+          <text class="mini-title">{{miniTitle}}</text>
+        </div>
+      </div>
+      <div for="item in items" class="item" on:click="open(item.key)">
+        <text class="item-text">{{item.label}}</text>
+      </div>
+    </div>
+    <div class="bottom-space"></div>
+  </scroll>
+</template>
+
+<style>
+  .page {
+    width: 466px;
+    height: 466px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .top-space {
+    width: 10px;
+    height: 44px;
+  }
+
+  .bottom-space {
+    width: 10px;
+    height: 90px;
+  }
+
+  .title {
+    width: 300px;
+    font-size: 34px;
+    color: #ffa040;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .message-box {
+    width: 340px;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .empty-icon {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 16px;
+  }
+
+  .message {
+    width: 340px;
+    font-size: 28px;
+    color: #d8d8e8;
+    text-align: center;
+  }
+
+  .menu {
+    width: 466px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mini {
+    width: 360px;
+    height: 88px;
+    margin-bottom: 14px;
+    border-radius: 44px;
+    background-color: #3a2410;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 12px;
+  }
+
+  .mini-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    background-color: #ffa040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mini-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mini-text {
+    flex: 1;
+    height: 88px;
+    margin-left: 10px;
+    padding-right: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .mini-state {
+    font-size: 20px;
+    color: #ffa040;
+  }
+
+  .mini-title {
+    max-width: 250px;
+    font-size: 26px;
+    color: #ffffff;
+    max-lines: 1;
+    text-overflow: ellipsis;
+  }
+
+  .item {
+    width: 340px;
+    height: 70px;
+    margin-bottom: 10px;
+    border-radius: 35px;
+    background-color: #1e1e2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .item-text {
+    font-size: 30px;
+    color: #ffffff;
+    text-align: center;
+  }
+</style>
+
+<script>
+  import { boot, openView, openInput, openPlayer } from '../lib/boot.js'
+  import { lib } from '../lib/library.js'
+  import { pl, current, subscribe, sync, toggle } from '../lib/player.js'
+  import { T } from '../lib/strings.js'
+
+  const MENU = [
+    { key: 'folders', label: T.folders },
+    { key: 'artists', label: T.artists },
+    { key: 'albums', label: T.albums },
+    { key: 'playlists', label: T.playlists },
+    { key: 'recent', label: T.recent },
+    { key: 'favorites', label: T.favorites },
+    { key: 'all', label: T.allSongs },
+    { key: 'search', label: T.search }
+  ]
+
+  export default {
+    data: {
+      title: T.appTitle,
+      loadingText: T.loading,
+      emptyText: T.empty,
+      status: 'loading',
+      items: MENU,
+      hasTrack: false,
+      playing: false,
+      miniState: '',
+      miniTitle: ''
+    },
+    unsub: null,
+    onInit() {
+      boot().then(() => this.refresh())
+    },
+    onShow() {
+      if (!this.unsub) this.unsub = subscribe(() => this.refresh())
+      sync()
+      this.refresh()
+    },
+    onHide() {
+      if (this.unsub) this.unsub()
+      this.unsub = null
+    },
+    refresh() {
+      this.status = lib.status
+      this.emptyText = lib.status === 'bad' ? T.badIndex : T.empty
+      const t = current()
+      this.hasTrack = !!t
+      this.playing = pl.status === 'play'
+      this.miniState = pl.status === 'play' ? T.nowPlaying : T.paused
+      this.miniTitle = t ? t.title : ''
+    },
+    toggle() {
+      toggle()
+      this.refresh()
+    },
+    openNow() {
+      openPlayer()
+    },
+    open(key) {
+      if (key === 'search') {
+        openInput('search')
+        return
+      }
+      openView({ kind: key })
+    }
+  }
+</script>

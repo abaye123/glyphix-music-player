@@ -1,0 +1,144 @@
+<template>
+  <scroll class="page">
+    <div class="top-space"></div>
+    <text class="title">{{title}}</text>
+    <text class="subtitle">{{song}}</text>
+    <div class="action" on:click="newList">
+      <text class="action-text">{{newText}}</text>
+    </div>
+    <div for="p in lists" class="item" on:click="pick(p.index)">
+      <text class="item-text">{{p.name}}</text>
+      <text class="item-sub">{{p.sub}}</text>
+    </div>
+    <div class="bottom-space"></div>
+  </scroll>
+</template>
+
+<style>
+  .page {
+    width: 466px;
+    height: 466px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .top-space {
+    width: 10px;
+    height: 48px;
+  }
+
+  .bottom-space {
+    width: 10px;
+    height: 100px;
+  }
+
+  .title {
+    width: 300px;
+    font-size: 30px;
+    color: #ffa040;
+    text-align: center;
+  }
+
+  .subtitle {
+    width: 300px;
+    font-size: 22px;
+    color: #b0b0c4;
+    text-align: center;
+    max-lines: 1;
+    text-overflow: ellipsis;
+  }
+
+  .action {
+    width: 300px;
+    height: 62px;
+    margin-top: 12px;
+    border-radius: 31px;
+    background-color: #3a2410;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .action-text {
+    font-size: 26px;
+    color: #ffc080;
+  }
+
+  .item {
+    width: 340px;
+    height: 80px;
+    margin-top: 10px;
+    border-radius: 24px;
+    background-color: #1e1e2c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .item-text {
+    width: 300px;
+    font-size: 26px;
+    color: #ffffff;
+    text-align: center;
+    max-lines: 1;
+    text-overflow: ellipsis;
+  }
+
+  .item-sub {
+    font-size: 18px;
+    color: #9a9ab0;
+  }
+</style>
+
+<script>
+  import prompt from '@system.prompt'
+  import router from '@system.router'
+  import { openInput, takeAdded } from '../lib/boot.js'
+  import { existing } from '../lib/library.js'
+  import { st, addToPlaylist } from '../lib/store.js'
+  import { current } from '../lib/player.js'
+  import { T, countText } from '../lib/strings.js'
+
+  function toast(text) {
+    try {
+      prompt.showToast({ message: text })
+    } catch (e) {
+      console.info('[music] toast failed: ' + e)
+    }
+  }
+
+  export default {
+    data: {
+      title: T.chooseList,
+      song: '',
+      newText: T.newPlaylist,
+      lists: []
+    },
+    onShow() {
+      if (takeAdded()) {
+        router.back()
+        return
+      }
+      const t = current()
+      this.song = t ? t.title : ''
+      this.lists = st.playlists.map((p, i) => ({
+        index: i,
+        name: p.name,
+        sub: countText(existing(p.tracks).length)
+      }))
+    },
+    pick(index) {
+      const t = current()
+      if (!t) return
+      toast(addToPlaylist(index, t.id) ? T.added : T.alreadyIn)
+      router.back()
+    },
+    newList() {
+      const t = current()
+      openInput('newlist', { addId: t ? t.id : '' })
+    }
+  }
+</script>
