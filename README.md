@@ -54,7 +54,7 @@ The system font has Hebrew and the text engine applies the Unicode bidi algorith
 
 ## Package
 
-`com.xfaith.woodenfish`, so it installs into the Wooden Fish menu slot (AppID 0xC82C), replacing whatever is there. versionCode 300.
+`com.abaye.music`, a free package opened by the `my-apps` launcher. versionCode 400.
 
 ## Build
 
@@ -64,7 +64,7 @@ Requires the Glyphix CLI (`gx` v0.11.0, in `dt-g1-research/tools/glyphix-toolcha
 gx build -d dtg1-c175r -f
 ```
 
-The package is written to `.glyphix-work/dist/dtg1-c175r/com.xfaith.woodenfish/bundle.pkg`.
+The package is written to `.glyphix-work/dist/dtg1-c175r/com.abaye.music/bundle.pkg`.
 
 The icon and the UI glyphs are drawn by `tools/render-icon.ps1`:
 
@@ -77,7 +77,7 @@ The icon and the UI glyphs are drawn by `tools/render-icon.ps1`:
 Put a library in `.glyphix-work/image/dtg1-emu-466x466/data/mass/music/` (`index.json`, `tracks/`, `covers/`) and run:
 
 ```
-gx emulate -d dtg1-emu-466x466 --target=com.xfaith.woodenfish
+gx emulate -d dtg1-emu-466x466 --target=com.abaye.music
 ```
 
-`dtg1-emu-466x466` is `generic-watch-466x466` with a Hebrew font. The state file lands in `.glyphix-work/image/dtg1-emu-466x466/data/files/com.xfaith.woodenfish/state.json`.
+`dtg1-emu-466x466` is `generic-watch-466x466` with a Hebrew font. The state file lands in `.glyphix-work/image/dtg1-emu-466x466/data/files/com.abaye.music/state.json`.

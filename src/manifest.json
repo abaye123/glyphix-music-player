@@ -1,9 +1,9 @@
 {
-  "package": "com.xfaith.woodenfish",
+  "package": "com.abaye.music",
   "name": "מוזיקה",
   "icon": "/assets/icon.png",
   "versionName": "0.3.0",
-  "versionCode": 300,
+  "versionCode": 400,
   "features": [],
   "permissions": [
     { "name": "watch.permission.SYSTEM" }
