@@ -81,3 +81,7 @@ gx emulate -d dtg1-emu-466x466 --target=com.abaye.music
 ```
 
 `dtg1-emu-466x466` is `generic-watch-466x466` with a Hebrew font. The state file lands in `.glyphix-work/image/dtg1-emu-466x466/data/files/com.abaye.music/state.json`.
+
+## License
+
+Personal, non-commercial use. Anything you share that is based on this project must be published as open source under the same license. Commercial use requires prior written permission. See [LICENSE](LICENSE).
